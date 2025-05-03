@@ -1,19 +1,6 @@
 version: '3.8'
 
 services:
-#  rabbitmq:
-#    image: rabbitmq:3-management
-#    container_name: rabbitmq
-#    ports:
-#      - "5672:5672"  # Port for RabbitMQ clients
-#      - "15672:15672"  # Port for RabbitMQ management UI
-#    environment:
-#      RABBITMQ_DEFAULT_USER: user
-#      RABBITMQ_DEFAULT_PASS: password
-#    volumes:
-#      - rabbitmq_data:/var/lib/rabbitmq
-#    restart: unless-stopped
-
   webapp:
     build:
       context: ./webapp
@@ -21,7 +8,7 @@ services:
     container_name: webapp
     depends_on:
       - recommendations
-      # - interactions
+      - interactions
     ports:
       - "8001:8000"
     volumes:
@@ -45,5 +32,57 @@ services:
       env_file:
         - .env
 
+  interactions:
+    build:
+      context: ./interactions
+      dockerfile: Dockerfile
+    container_name: interactions
+    ports:
+      - "${INTERACTION_SERVICE_PORT}:8000"
+    depends_on:
+      - rabbitmq
+      - redis
+    volumes:
+      - ./interactions/logs:/logs
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+      - interactions/.env
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"  # client
+      - "15672:15672"  # management UI
+    env_file:
+      interactions/.env
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    env_file:
+      - .env
+      - interactions/.env
+    command:
+      [
+        "redis-server",
+        "--appendonly", "yes",
+        "--appendfilename", "appendonly.aof",
+        "--dir", "/data"
+      ]
+
 volumes:
+  logs:
   rabbitmq_data:
+  redis_data:
+    driver: local

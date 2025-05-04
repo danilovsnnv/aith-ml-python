@@ -1,4 +1,4 @@
-from .events import InteractEvent, NewItemsEvent
+from .events import NewItemsEvent
 from .recommendations import RecommendationsResponse
 
-__all__ = ['InteractEvent', 'NewItemsEvent', 'RecommendationsResponse']
+__all__ = ['NewItemsEvent', 'RecommendationsResponse']

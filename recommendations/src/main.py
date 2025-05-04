@@ -3,7 +3,7 @@ from fastapi import FastAPI
 
 from api.v1.rec import router as rec_router
 
-app = FastAPI()
+app = FastAPI(title="Recommendation Service API")
 app.include_router(rec_router)
 
 if __name__ == '__main__':

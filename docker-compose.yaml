@@ -19,18 +19,18 @@ services:
       - .env
 
   recommendations:
-      build:
-        context: ./recommendations
-        dockerfile: Dockerfile
-      container_name: recommendations
-      ports:
-        - "${REC_SERVICE_PORT}:8000"
-      volumes:
-        - ./recommendations/logs:/logs
-      environment:
-        - PYTHONUNBUFFERED=1
-      env_file:
-        - .env
+    build:
+      context: ./recommendations
+      dockerfile: Dockerfile
+    container_name: recommendations
+    ports:
+      - "${REC_SERVICE_PORT}:8000"
+    volumes:
+      - ./recommendations/logs:/logs
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
 
   interactions:
     build:
@@ -40,8 +40,10 @@ services:
     ports:
       - "${INTERACTION_SERVICE_PORT}:8000"
     depends_on:
-      - rabbitmq
-      - redis
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
     volumes:
       - ./interactions/logs:/logs
     environment:
@@ -61,6 +63,11 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7.0-alpine

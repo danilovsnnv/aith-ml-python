@@ -9,7 +9,7 @@ from api.v1.webapp import router as webapp_router
 
 BASE_DIR = Path(__file__).resolve().parent
 
-app = FastAPI()
+app = FastAPI(title="Rec Service Web Application API")
 app.include_router(webapp_router)
 app.add_middleware(SessionMiddleware, secret_key=os.urandom(24))
 

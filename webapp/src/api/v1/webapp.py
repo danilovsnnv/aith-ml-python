@@ -30,7 +30,8 @@ def get_url(host: str, port: str | int):
     return f'http://{host}:{port}'
 
 REC_SERVICE_URL = get_url(os.getenv('REC_SERVICE_HOST'), os.getenv('DEFAULT_PORT'))
-INTERACTION_URL = get_url(os.getenv('INTERACTION_SERVICE_HOST'), os.getenv('DEFAULT_PORT'))
+# INTERACTION_URL = get_url(os.getenv('INTERACTION_SERVICE_HOST'), os.getenv('INTERACTION_SERVICE_PORT'))
+INTERACTION_URL = os.getenv('INTERACTIONS_BROWSER_URL')
 
 # TODO: remove this code
 def get_imdb_url(imdb_id):
@@ -58,7 +59,6 @@ async def index(request: Request):
             request.session['user_id'] = user_id
 
     logger.info(f"Fetching recommendations for user_id={user_id}")
-    logger.info(f"REC_SERVICE_URL={REC_SERVICE_URL}")
     recommendations_url = f"{REC_SERVICE_URL}/recs/{user_id}"
     response = requests.get(recommendations_url, timeout=60)
     if response.status_code == 200:
@@ -67,7 +67,6 @@ async def index(request: Request):
         recommended_item_ids = []
 
     items_data = fetch_items_data_for_item_ids(recommended_item_ids)
-
 
     return templates.TemplateResponse(
         'index.html',

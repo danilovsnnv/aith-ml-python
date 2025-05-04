@@ -47,7 +47,7 @@
                 type: 'POST',
                 url: '{{ interactions_url }}/interact',
                 contentType: 'application/json',
-                data: JSON.stringify({user_id: getUserID(), item_ids: [item_id.toString()], actions: [action]}),
+                data: JSON.stringify({user_id: getUserID(), item_id: item_id.toString(), action: action}),
                 success: function (response) {
                     // Handle the response if needed
                 },

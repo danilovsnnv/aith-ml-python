@@ -1,7 +1,7 @@
 import httpx
 import logging
 
-from fastapi import HTTPException, status, Request, Response
+from fastapi import status, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import JSONResponse
 

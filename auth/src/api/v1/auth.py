@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response
-from fastapi.security import OAuth2PasswordRequestForm
 
 from core.config import settings
 from core.dependencies import get_database_manager

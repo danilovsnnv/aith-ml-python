@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import logging
 from typing import TypeAlias
 
@@ -10,9 +9,6 @@ from redis.exceptions import RedisError
 from core.config import settings
 
 id_type: TypeAlias = int | str
-
-from pathlib import Path
-Path("./logs").mkdir(parents=True, exist_ok=True)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -78,13 +74,13 @@ class RedisManager:
             logger.error(f'Error during removing elements for {key=} and {item_id=}: {e}', exc_info=True)
             return False
 
-    def get(self, user_id: id_type) -> list[str]:
+    def get(self, user_id: id_type) -> bytes | None:
         """
         Возвращает список всех просмотренных item_id для user_id.
         """
         try:
             key = self._key(user_id)
-            self.redis.get(key)
+            return self.redis.get(key)
         except redis.exceptions.ConnectionError as e:
             logger.error(f'Error during removing elements for {key=}: {e}', exc_info=True)
-            return []
+            return None

@@ -1,6 +1,7 @@
+import time
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-import time
 
 from models.events import InteractEvent
 from services.rabbitmq_manager import RabbitMQManager

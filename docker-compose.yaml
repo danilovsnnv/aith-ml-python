@@ -7,10 +7,9 @@ services:
       dockerfile: Dockerfile
     container_name: webapp
     depends_on:
-      - recommendations
-      - interactions
+      - api-gateway
     ports:
-      - "8001:8000"
+      - "8000:8000"
     volumes:
      - ./webapp/logs:/logs
     environment:
@@ -24,7 +23,7 @@ services:
       dockerfile: Dockerfile
     container_name: recommendations
     ports:
-      - "${REC_SERVICE_PORT}:8000"
+      - "8001:8000"
     volumes:
       - ./recommendations/logs:/logs
     environment:
@@ -38,7 +37,7 @@ services:
       dockerfile: Dockerfile
     container_name: interactions
     ports:
-      - "${INTERACTION_SERVICE_PORT}:8000"
+      - "8002:8000"
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -51,6 +50,42 @@ services:
     env_file:
       - .env
       - interactions/.env
+
+  auth:
+    build:
+      context: ./auth
+      dockerfile: Dockerfile
+    container_name: auth
+    ports:
+      - "8003:8000"
+    depends_on:
+      - database
+    volumes:
+      - ./auth/logs:/logs
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+      - auth/.env
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8004:8000"
+    depends_on:
+      - recommendations
+      - interactions
+      - auth
+    volumes:
+      - ./auth/logs:/logs
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+      - auth/.env
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -88,8 +123,19 @@ services:
         "--dir", "/data"
       ]
 
+  database:
+   image: postgres:15
+   container_name: database
+   env_file:
+     - auth/.env
+   ports:
+     - "5432:5432"
+   volumes:
+     - postgresql_data:/var/lib/postgresql/data
+
 volumes:
   logs:
   rabbitmq_data:
   redis_data:
     driver: local
+  postgresql_data:

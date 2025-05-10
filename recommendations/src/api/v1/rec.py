@@ -1,25 +1,15 @@
 import numpy as np
 import random
-from fastapi import APIRouter, Response, status
+from fastapi import APIRouter, Request
 
 from models import RecommendationsResponse, NewItemsEvent
 
-router = APIRouter(tags=['recs'])
+router = APIRouter(prefix='/recs', tags=['recs'])
 
 # unique_item_ids = set()
 unique_item_ids = set([str(i) for i in range(100)])
 
 EPSILON = 0.05
-
-@router.get('/')
-def index():
-    return {'message': 'recommendation-service'}
-
-
-@router.get('/healthcheck')
-def healthcheck():
-    return {'status': 'ok'}
-
 
 @router.get('/cleanup')
 def cleanup():
@@ -39,8 +29,8 @@ def add_movie(request: NewItemsEvent):
         unique_item_ids.add(item_id)
 
 
-@router.get('/recs/{user_id}')
-def get_recs(user_id: str):
+@router.get('/recs', response_model=RecommendationsResponse)
+def get_recs(request: Request):
     global unique_item_ids
 
     # try:
@@ -49,6 +39,7 @@ def get_recs(user_id: str):
     #     item_ids = None
 
     item_ids = None  # TODO: add recs
+    user_id = request.headers.get('X-User-Id')
 
     if item_ids is None or random.random() < EPSILON:
         item_ids = np.random.choice(list(unique_item_ids), size=20, replace=False).tolist()

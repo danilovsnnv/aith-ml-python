@@ -5,40 +5,24 @@ import time
 from models.events import InteractEvent
 from services.rabbitmq_manager import RabbitMQManager
 from services.redis_manager import RedisManager
-from core.dependences import get_rabbitmq, get_redis
-
-router = APIRouter(tags=["interactions"])
+from core.dependencies import get_rabbitmq, get_redis, get_authorized_user_id
 
 
-@router.get("/")
-async def index():
-    return {"message": "interaction-service"}
+router = APIRouter(prefix='/interact', tags=['interactions'])
 
 
-@router.get("/healthcheck")
-async def healthcheck():
-    return {"status": "ok"}
-
-
-@router.post("/interact")
+@router.post('/interact')
 async def interact(
     event: InteractEvent,
+    user_id: str = Depends(get_authorized_user_id),
     watched_queue: RabbitMQManager = Depends(get_rabbitmq),
     watched_filter: RedisManager = Depends(get_redis),
 ):
-    event.timestamp = time.time()
+    payload = event.model_dump()
+    payload['user_id'] = user_id
+    payload['timestamp'] = time.time()
 
-    await watched_queue.publish(event.model_dump())
-    watched_filter.add(user_id=event.user_id, item_id=event.item_id)
+    await watched_queue.publish(payload)
+    watched_filter.add(user_id=user_id, item_id=event.item_id)
 
-    return JSONResponse(content={"detail": "published"}, status_code=200)
-
-
-@router.on_event("startup")
-async def _startup():
-    await get_rabbitmq().connect()
-
-
-@router.on_event("shutdown")
-async def _shutdown():
-    await get_rabbitmq().close()
+    return JSONResponse(content={'detail': 'published'}, status_code=200)

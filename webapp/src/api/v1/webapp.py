@@ -28,7 +28,4 @@ async def index(request: Request):
 
 @router.get("/profile", response_class=Response, include_in_schema=False)
 async def profile_page(request: Request):
-    """
-    Serve the SPA page that fetches the user's profile data client-side.
-    """
     return templates.TemplateResponse("profile.html", {"request": request})

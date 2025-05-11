@@ -101,6 +101,35 @@ async function sendInteraction(itemId, action) {
   }
 }
 
+// New function to handle payment and fetch recommendations
+async function handleGetRecommendations() {
+  try {
+    const paymentRes = await fetch(`${gatewayBaseUrl}/user/change_balance`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ balance_change: -100.0 })
+    });
+    if (!paymentRes.ok) {
+      const errorData = await paymentRes.json();
+      return renderMessage(errorData.detail ?? 'Payment failed. Please ensure sufficient balance.');
+    }
+
+    fetchRecommendations();
+  } catch (error) {
+    console.error("Error processing payment", error);
+    renderMessage("Error processing payment. Try again later.");
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
-  fetchRecommendations();
+  const container = document.getElementById("recommendations");
+  container.innerHTML = '';
+
+  const payButton = document.createElement("button");
+  payButton.id = "get-recs-button";
+  payButton.className = "btn btn-secondary d-block mx-auto mb-3";
+  payButton.innerText = "Recommend me!";
+  payButton.onclick = handleGetRecommendations;
+  container.parentNode.insertBefore(payButton, container);
 });

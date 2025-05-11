@@ -91,37 +91,42 @@ class DatabaseManager:
             session.flush()
             return new_user.id
 
+    def user_exists(self, user_id: int) -> bool:
+        with self._session_scope() as session:
+            return session.query(
+                exists().where(Users.id == user_id)
+            ).scalar()
+
     def username_exists(self, username: str) -> bool:
         with self._session_scope() as session:
             return session.query(
                 exists().where(Users.username == username)
             ).scalar()
 
-    def get_user(self, user_id: int):
+    def get_user(self, user_id: int) -> UserResponse:
         with self._session_scope() as session:
-            user = session.query(Users).filter(Users.id == user_id).first()
+            user = session.get(Users, user_id)
             return self._wrap_orm_object(wrap_type=UserResponse, obj=user)
 
     def auth_user(self, username, password) -> int | None:
         with self._session_scope() as session:
-            user = session.query(Users).filter(Users.username == username).first()
+            user = session.query(Users).filter_by(username=username).first()
             if not user or not verify_password(password, user.password_hash):
                 return None
 
             return user.id
 
-    def get_balance(self, user_id: int) -> float | None:
+    def get_balance(self, user_id: int) -> float:
         with self._session_scope() as session:
-            user = session.query(Users).filter(Users.id == user_id).first()
-            if not user:
-                return None
-
+            user = session.query(Users).filter_by(id=user_id).first()
             return user.balance
 
     def change_balance(self, user_id: int, change_amount: float) -> float | None:
         with self._session_scope() as session:
-            user = session.query(Users).filter(Users.id == user_id).first()
-            if not user:
+            user = session.query(Users).filter_by(id=user_id).first()
+
+            if user.balance + change_amount < 0:
                 return None
+
             user.balance += change_amount
             return user.balance

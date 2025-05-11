@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Body, Depends, status
 from starlette.responses import JSONResponse
 
 from core.dependencies import get_authorized_user_id, get_database_manager
@@ -21,30 +21,37 @@ def check_balance(
     user_id: int = Depends(get_authorized_user_id),
     db_manager: DatabaseManager = Depends(get_database_manager)
 ):
-    account_balance: float | None = db_manager.get_balance(user_id)
-
-    if account_balance is None:
+    if not db_manager.user_exists(user_id):
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             headers={'WWW-Authenticate': 'Bearer'},
-            content={'detail': 'Users not found.'},
+            content={'detail': f'Users with id={id} found.'},
         )
+
+    account_balance: float = db_manager.get_balance(user_id)
 
     return Balance(balance=account_balance)
 
 @router.post('/change_balance')
 def change_balance(
+    change_form: ChangeBalance = Body(...),
     user_id: int = Depends(get_authorized_user_id),
     db_manager: DatabaseManager = Depends(get_database_manager)
 ):
-    change_amount = change_balance.balance_change
-    account_balance: float | None = db_manager.change_balance(user_id, change_amount)
-    
-    if account_balance is None:
+    if not db_manager.user_exists(user_id):
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             headers={'WWW-Authenticate': 'Bearer'},
-            content={'detail': 'Users not found.'},
+            content={'detail': f'Users with id={id} found.'},
+        )
+
+    account_balance: float | None = db_manager.change_balance(user_id, change_form.balance_change)
+    
+    if account_balance is None:
+        return JSONResponse(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            headers={'WWW-Authenticate': 'Bearer'},
+            content={'detail': 'Not enough money to perform operation'},
         )
 
     return {'message': 'Successfully changed user balance'}

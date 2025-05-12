@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, status, Response
 from core.config import settings
 from core.dependencies import get_database_manager
 from core.security import create_access_token
-from schemas.user import SignInSchema, SignUpSchema
-from services.database_manager import DatabaseManager
+from schemas.auth import SignInSchema, SignUpSchema
+from services.database_manager import AuthDatabaseManager
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 
@@ -13,7 +13,7 @@ router = APIRouter(prefix='/auth', tags=['auth'])
 def register(
     response: Response,
     sign_up: SignUpSchema,
-    db_manager: DatabaseManager = Depends(get_database_manager)
+    db_manager: AuthDatabaseManager = Depends(get_database_manager)
 ):
     if db_manager.username_exists(sign_up.username):
         raise HTTPException(
@@ -37,7 +37,7 @@ def register(
 def login(
     response: Response,
     sign_in: SignInSchema,
-    db_manager: DatabaseManager = Depends(get_database_manager),
+    db_manager: AuthDatabaseManager = Depends(get_database_manager),
 ):
     user_id = db_manager.auth_user(sign_in.username, sign_in.password)
     if not user_id:

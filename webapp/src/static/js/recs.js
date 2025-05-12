@@ -104,7 +104,7 @@ async function sendInteraction(itemId, action) {
 // New function to handle payment and fetch recommendations
 async function handleGetRecommendations() {
   try {
-    const paymentRes = await fetch(`${gatewayBaseUrl}/user/change_balance`, {
+    const paymentRes = await fetch(`${gatewayBaseUrl}/profile/change_balance`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },

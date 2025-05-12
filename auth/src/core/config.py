@@ -3,10 +3,6 @@ from __future__ import annotations
 from functools import lru_cache
 from pydantic.v1 import BaseSettings, Field
 
-import dotenv
-dotenv.load_dotenv('/Users/danilovsnnv/Work/projects/aith-ml-python/auth/.env')
-dotenv.load_dotenv('/Users/danilovsnnv/Work/projects/aith-ml-python/.env')
-
 class Settings(BaseSettings):
     # crypto
     secret_key: str = Field(env='JWT_SECRET_KEY')

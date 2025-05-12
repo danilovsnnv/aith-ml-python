@@ -13,7 +13,7 @@ from sqlalchemy_utils import create_database, database_exists
 from core.config import settings
 from core.security import get_password_hash, verify_password
 from models.base import Base
-from models.responces import UserResponse
+from schemas.users import UserResponse
 from models.users import Users
 
 ModelType = TypeVar('ModelType', bound=BaseModel)
@@ -28,7 +28,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class DatabaseManager:
+class AuthDatabaseManager:
     """
     Manager to work with database
     """

@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => loadProfile());
 
 async function loadProfile() {
   try {
-    const res = await fetch(`${gatewayBaseUrl}/user/me`, {
+    const res = await fetch(`${gatewayBaseUrl}/profile/me`, {
       method: "GET",
       credentials: "include",  // send cookies (access_token)
     });
@@ -53,7 +53,7 @@ function renderProfileCard({ username, balance }) {
     const payload = { balance_change: amount };
     console.log("Change balance payload:", payload);
     try {
-      const res = await fetch(`${gatewayBaseUrl}/user/change_balance`, {
+      const res = await fetch(`${gatewayBaseUrl}/profile/change_balance`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

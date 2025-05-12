@@ -14,7 +14,7 @@ class Settings(BaseSettings):
         'interact': 'http://interactions:8000',
         'rec': 'http://recommendations:8000',
         'auth': 'http://auth:8000',
-        'user': 'http://auth:8000',
+        'profile': 'http://auth:8000',
     }
     auth_prefix: str = '/auth'
 

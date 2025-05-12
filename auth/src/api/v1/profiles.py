@@ -2,16 +2,16 @@ from fastapi import APIRouter, Body, Depends, status
 from starlette.responses import JSONResponse
 
 from core.dependencies import get_authorized_user_id, get_database_manager
-from models.balance import Balance, ChangeBalance
-from models.responces import UserResponse
-from services.database_manager import DatabaseManager
+from schemas.balance import Balance, ChangeBalance
+from schemas.users import UserResponse
+from services.database_manager import AuthDatabaseManager
 
-router = APIRouter(prefix='/user', tags=['user'])
+router = APIRouter(prefix='/profile', tags=['profiles'])
 
 @router.get('/me', response_model=UserResponse)
 def get_current_user(
     user_id: int = Depends(get_authorized_user_id),
-    database_manager: DatabaseManager = Depends(get_database_manager)
+    database_manager: AuthDatabaseManager = Depends(get_database_manager)
 ):
     user = database_manager.get_user(user_id)
     return user
@@ -19,7 +19,7 @@ def get_current_user(
 @router.get('/check_balance', response_model=ChangeBalance)
 def check_balance(
     user_id: int = Depends(get_authorized_user_id),
-    db_manager: DatabaseManager = Depends(get_database_manager)
+    db_manager: AuthDatabaseManager = Depends(get_database_manager)
 ):
     if not db_manager.user_exists(user_id):
         return JSONResponse(
@@ -36,7 +36,7 @@ def check_balance(
 def change_balance(
     change_form: ChangeBalance = Body(...),
     user_id: int = Depends(get_authorized_user_id),
-    db_manager: DatabaseManager = Depends(get_database_manager)
+    db_manager: AuthDatabaseManager = Depends(get_database_manager)
 ):
     if not db_manager.user_exists(user_id):
         return JSONResponse(

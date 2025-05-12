@@ -14,8 +14,6 @@ services:
      - ./webapp/logs:/logs
     environment:
      - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
 
   recommendations:
     build:
@@ -29,7 +27,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     env_file:
-      - .env
+      - dotenv_files/.env.database
 
   interactions:
     build:
@@ -48,8 +46,8 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     env_file:
-      - .env
-      - interactions/.env
+      - dotenv_files/.env.rabbitmq
+      - dotenv_files/.env.redis
 
   auth:
     build:
@@ -65,8 +63,8 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     env_file:
-      - .env
-      - auth/.env
+      - dotenv_files/.env.database
+      - dotenv_files/.env.security
 
   api-gateway:
     build:
@@ -84,8 +82,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     env_file:
-      - .env
-      - auth/.env
+      - dotenv_files/.env.security
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -94,7 +91,7 @@ services:
       - "5672:5672"  # client
       - "15672:15672"  # management UI
     env_file:
-      interactions/.env
+      - dotenv_files/.env.rabbitmq
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     restart: unless-stopped
@@ -113,8 +110,7 @@ services:
     volumes:
       - redis_data:/data
     env_file:
-      - .env
-      - interactions/.env
+      - dotenv_files/.env.redis
     command:
       [
         "redis-server",
@@ -127,7 +123,7 @@ services:
    image: postgres:15
    container_name: database
    env_file:
-     - auth/.env
+     - dotenv_files/.env.database
    ports:
      - "5432:5432"
    volumes:

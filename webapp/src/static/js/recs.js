@@ -23,8 +23,8 @@ async function fetchRecommendations() {
       // alert(`Not authorized: ${err.error}`);
       return renderMessage("You are not authorized. Login or create an account first");
     }
-    const { item_ids = [] } = await res.json();
-    renderRecommendations(item_ids);
+    const recommendations = await res.json(); // array of { img_id, title_id, original_name }
+    renderRecommendations(recommendations);
   } catch (err) {
     console.error(err);
     renderMessage("Error getting recommendations. Try again later.");
@@ -39,15 +39,17 @@ function renderMessage(text) {
     </div>`;
 }
 
-function renderRecommendations(itemIds) {
+function renderRecommendations(items) {
   const container = document.getElementById("recommendations");
   container.innerHTML = "";
 
-  if (itemIds.length === 0) {
+  if (items.length === 0) {
     return renderMessage("No recommendations found");
   }
 
-  itemIds.forEach(id => {
+  items.forEach(item => {
+    const { img_id, title_id, original_name } = item;
+
     const col = document.createElement("div");
     col.className = "col-sm-6 col-md-4 col-lg-3";
 
@@ -55,33 +57,39 @@ function renderRecommendations(itemIds) {
     card.className = "card movie-card h-100 shadow-sm";
 
     const img = document.createElement("img");
-    img.src = `/static/images/${id}.jpg`;
-    img.alt = `Movie ${id}`;
+    img.src = `/static/images/${img_id}.jpg`;
+    img.alt = original_name;
     img.className = "card-img-top";
+
+    // wrap poster in a link to the IMDB page
+    const link = document.createElement("a");
+    link.href = `http://imdb.com/title/${title_id}`;
+    link.target = "_blank";
+    link.append(img);
 
     const body = document.createElement("div");
     body.className = "card-body d-flex flex-column";
 
     const title = document.createElement("h5");
     title.className = "card-title";
-    title.innerText = `Movie №${id}`;
+    title.innerText = original_name;
 
     const btnLike = document.createElement("button");
     btnLike.className = "btn btn-outline-secondary flex-fill";
     btnLike.innerText = "👍";
-    btnLike.onclick = () => sendInteraction(id, 'like');
+    btnLike.onclick = () => sendInteraction(img_id, 'like');
 
     const btnDislike = document.createElement("button");
     btnDislike.className = "btn btn-outline-secondary flex-fill";
     btnDislike.innerText = "👎";
-    btnDislike.onclick = () => sendInteraction(id, 'dislike');
+    btnDislike.onclick = () => sendInteraction(img_id, 'dislike');
 
     const btnContainer = document.createElement("div");
     btnContainer.className = "d-flex w-100 mt-auto gap-2";
     btnContainer.append(btnLike, btnDislike);
 
     body.append(title, btnContainer);
-    card.append(img, body);
+    card.append(link, body);
     col.append(card);
     container.append(col);
   });

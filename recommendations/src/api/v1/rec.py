@@ -1,46 +1,30 @@
-import numpy as np
-import random
-from fastapi import APIRouter, Request
+import logging
+from fastapi import APIRouter, Depends
 
-from models import RecommendationsResponse, NewItemsEvent
+from core.dependencies import get_database_manager, get_authorized_user_id
+from schemas.recommendations import RecommendationResponse
+from services.database_manager import MovieDatabaseManager
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[
+        logging.FileHandler("./logs/app.log"),
+        logging.StreamHandler()
+    ]
+)
+
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix='/recs', tags=['recs'])
 
-# unique_item_ids = set()
-unique_item_ids = set([str(i) for i in range(100)])
 
-EPSILON = 0.05
+@router.get('/recs', response_model=list[RecommendationResponse])
+def get_recs(
+    user_id: str = Depends(get_authorized_user_id),
+    db_manager: MovieDatabaseManager = Depends(get_database_manager),
+) -> list[RecommendationResponse]:
+    # TODO: add cold start check
+    logger.info(f'Getting recs for {user_id}')
+    movies = db_manager.get_top_rated_movies(n=20)
+    return [movie.to_recommendation_response() for movie in movies]
 
-@router.get('/cleanup')
-def cleanup():
-    global unique_item_ids
-    unique_item_ids = set()
-    # try:
-    #     redis_connection.delete('*')
-    #     redis_connection.json().delete('*')
-    # except redis.exceptions.ConnectionError:
-    #     return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-
-@router.post('/add_items')
-def add_movie(request: NewItemsEvent):
-    global unique_item_ids
-    for item_id in request.item_ids:
-        unique_item_ids.add(item_id)
-
-
-@router.get('/recs', response_model=RecommendationsResponse)
-def get_recs(request: Request):
-    global unique_item_ids
-
-    # try:
-    #     item_ids = redis_connection.json().get('top_items')
-    # except redis.exceptions.ConnectionError:
-    #     item_ids = None
-
-    item_ids = None  # TODO: add recs
-    user_id = request.headers.get('X-User-Id')
-
-    if item_ids is None or random.random() < EPSILON:
-        item_ids = np.random.choice(list(unique_item_ids), size=20, replace=False).tolist()
-    return RecommendationsResponse(item_ids=item_ids)

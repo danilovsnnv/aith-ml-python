@@ -3,17 +3,8 @@ from __future__ import annotations
 from functools import lru_cache
 from pydantic.v1 import BaseSettings, Field
 
+
 class Settings(BaseSettings):
-    # crypto
-    secret_key: str = Field(env='JWT_SECRET_KEY')
-    algorithm: str = Field(default='HS256', env='ALGORITHM')
-    access_token_expire_minutes: int = Field(default=30, env='ACCESS_TOKEN_EXPIRE_MINUTES')
-
-    # cookie
-    cookie_name: str = Field(default='access_token', env='COOKIE_NAME')
-    cookie_max_age: int = Field(default=3600, env='COOKIE_MAX_AGE')
-
-    # database
     database: str = Field(env='POSTGRES_DB')
     username: str = Field(env='POSTGRES_USER')
     password: str = Field(env='POSTGRES_PASSWORD')

@@ -77,12 +77,24 @@ function renderRecommendations(items) {
     const btnLike = document.createElement("button");
     btnLike.className = "btn btn-outline-secondary flex-fill";
     btnLike.innerText = "👍";
-    btnLike.onclick = () => sendInteraction(img_id, 'like');
+    btnLike.onclick = () => {
+      sendInteraction(img_id, 'like');
+      btnLike.classList.remove('btn-outline-secondary');
+      btnLike.classList.add('btn-success');      // keep it filled/colored
+      btnLike.disabled = true;                  // prevent double‑voting
+      btnDislike.disabled = true;
+    };
 
     const btnDislike = document.createElement("button");
     btnDislike.className = "btn btn-outline-secondary flex-fill";
     btnDislike.innerText = "👎";
-    btnDislike.onclick = () => sendInteraction(img_id, 'dislike');
+    btnDislike.onclick = () => {
+      sendInteraction(img_id, 'dislike');
+      btnDislike.classList.remove('btn-outline-secondary');
+      btnDislike.classList.add('btn-danger');   // colored state
+      btnLike.disabled = true;                  // prevent double‑voting
+      btnDislike.disabled = true;
+    };
 
     const btnContainer = document.createElement("div");
     btnContainer.className = "d-flex w-100 mt-auto gap-2";
@@ -97,12 +109,25 @@ function renderRecommendations(items) {
 
 async function sendInteraction(itemId, action) {
   try {
-    await fetch(`${gatewayBaseUrl}/interact/interact`, {
+    const res = await fetch(`${gatewayBaseUrl}/interact/interact`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ item_id: itemId, action: action }),
     });
+
+    if (res.status === 409) {
+      alert("You have already rated this movie/series");
+      return;
+    }
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      alert(errorData.detail ?? "Error sending interaction");
+      return;
+    }
+
+    // Optionally handle successful interaction here
   } catch (err) {
     console.error("Error sending interaction", err);
     alert("Error sending interaction");
@@ -118,6 +143,11 @@ async function handleGetRecommendations() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ balance_change: -100.0 })
     });
+
+    if (paymentRes.status === 401) {
+      return renderMessage("You are not authorized. Login or create an account first");
+    }
+
     if (!paymentRes.ok) {
       const errorData = await paymentRes.json();
       return renderMessage(errorData.detail ?? 'Payment failed. Please ensure sufficient balance.');

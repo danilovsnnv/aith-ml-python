@@ -28,6 +28,7 @@ services:
       - PYTHONUNBUFFERED=1
     env_file:
       - dotenv_files/.env.database
+      - dotenv_files/.env.redis
 
   interactions:
     build:

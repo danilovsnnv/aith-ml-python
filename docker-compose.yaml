@@ -23,6 +23,7 @@ services:
     ports:
       - "8001:8000"
     volumes:
+      - ml_data:/src/data
       - ./recommendations/logs:/logs
     environment:
       - PYTHONUNBUFFERED=1
@@ -93,6 +94,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+    volumes:
+      - ml_data:/src/data
     env_file:
       - dotenv_files/.env.rabbitmq
 
@@ -147,3 +150,4 @@ volumes:
   redis_data:
     driver: local
   postgresql_data:
+  ml_data:

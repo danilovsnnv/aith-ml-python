@@ -55,3 +55,17 @@ def login(
         samesite='lax'
     )
     return {'message': 'Login successful'}
+
+
+@router.post('/logout', status_code=status.HTTP_200_OK)
+def logout(response: Response):
+    """
+    Remove the authentication cookie from the client to log them out.
+    """
+    response.delete_cookie(
+        key=settings.cookie_name,
+        httponly=True,
+        secure=False,
+        samesite='lax'
+    )
+    return {'message': 'Logout successful'}

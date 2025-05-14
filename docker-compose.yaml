@@ -84,6 +84,17 @@ services:
     env_file:
       - dotenv_files/.env.security
 
+  regular-pipeline:
+    build:
+      context: ./regular-pipeline
+      dockerfile: Dockerfile
+    container_name: regular-pipeline
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    env_file:
+      - dotenv_files/.env.rabbitmq
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq

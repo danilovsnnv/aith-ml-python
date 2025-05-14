@@ -20,10 +20,12 @@ from models.movies import Movies
 ModelType = TypeVar('ModelType', bound=BaseModel)
 
 logging.basicConfig(
-    filename='logs/app.log',
-    filemode='a',
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    level=logging.DEBUG,
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[
+        logging.FileHandler(filename='./logs/app.log'),
+        logging.StreamHandler()
+    ]
 )
 
 logger = logging.getLogger(__name__)

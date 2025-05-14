@@ -9,11 +9,14 @@ from core.config import settings
 from core.security import verify_access_token
 
 logging.basicConfig(
-    filename='logs/app.log',
-    filemode='a',
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    level=logging.DEBUG,
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[
+        logging.FileHandler(filename='./logs/app.log'),
+        logging.StreamHandler()
+    ]
 )
+
 logger = logging.getLogger(__name__)
 
 class AuthProxyMiddleware(BaseHTTPMiddleware):

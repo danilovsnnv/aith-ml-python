@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     port: int = Field(5432, env='DATABASE_PORT')
     query_params: dict[str, str] = Field(default_factory=dict)
 
+    redis_host: str = Field(env='REDIS_HOST', default='redis')
+    redis_port: str = Field(env='REDIS_PORT', default='6379')
+
     class Config:
         env_file = '.env'
         case_sensitive = True

@@ -15,11 +15,11 @@ class MovieBase(BaseModel):
     original_name: str
     description: str
     genre: list[str]
-    date: str
-    rating_count: float
-    rating_value: float
+    date: str | None
+    rating_count: float | None
+    rating_value: float | None
     keywords: list[str]
-    featured_review: str
+    featured_review: str | None
     stars: list[str]
     directors: list[str]
     creators: list[str]

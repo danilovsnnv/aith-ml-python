@@ -143,17 +143,28 @@ class MovieDatabaseManager:
             movie = session.get(Movies, movie_id)
             return self._wrap_orm_object(wrap_type=MovieOut, obj=movie)
 
-    def get_top_rated_movies(self, n: int = 10) -> list[MovieOut]:
+    def get_top_rated_movies(
+        self,
+        n: int = 10,
+        exclude_ids: set[int] | None = None,
+    ) -> list[MovieOut]:
+        """
+        Returns the top-rated `n` movies, excluding any whose IDs
+        are in `exclude_ids`.
+        """
         with self._session_scope() as session:
-            movies = (
-                session.query(Movies)
-                .order_by(
-                    Movies.rating_value.desc().nullslast(),
-                    Movies.rating_count.desc().nullslast()
-                )
-                .limit(n)
-                .all()
+            query = session.query(Movies)
+
+            if exclude_ids:
+                query = query.filter(~Movies.img_id.in_(exclude_ids))
+
+            query = query.order_by(
+                Movies.rating_value.desc().nullslast(),
+                Movies.rating_count.desc().nullslast(),
             )
+
+            movies = query.limit(n).all()
+
             return [
                 self._wrap_orm_object(wrap_type=MovieOut, obj=movie)
                 for movie in movies

@@ -10,10 +10,6 @@ class RabbitMQManager:
         self._exchange: RobustExchange | None = None
 
     async def connect(self) -> None:
-        """
-        Устанавливает соединение и готовит exchange + очередь.
-        Вызывается однажды на старте и при падении.
-        """
         if self._connection and not self._connection.is_closed:
             return
 
@@ -32,14 +28,9 @@ class RabbitMQManager:
         await queue.bind(self._exchange, settings.rabbitmq_routing_key)
 
     async def publish(self, payload: dict) -> None:
-        """
-        Публикует JSON-сообщение в direct-exchange.
-        Если не подключены — предварительно вызываем connect().
-        """
         if not self._exchange:
             await self.connect()
 
-        # Правильная сериализация и кодировка
         body = json.dumps(payload).encode("utf-8")
         message = Message(
             body,
@@ -48,6 +39,5 @@ class RabbitMQManager:
         await self._exchange.publish(message, routing_key=settings.rabbitmq_routing_key)
 
     async def close(self) -> None:
-        """Корректно закрываем соединение при завершении приложения."""
         if self._connection and not self._connection.is_closed:
             await self._connection.close()

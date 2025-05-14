@@ -22,8 +22,6 @@ class Settings(BaseSettings):
         env_file = '.env'
         env_file_encoding = 'utf-8'
 
-import dotenv
-dotenv.load_dotenv('/Users/danilovsnnv/Work/projects/aith-ml-python/dotenv_files/.env.rabbitmq.local')
 
 @lru_cache
 def get_settings() -> Settings:
